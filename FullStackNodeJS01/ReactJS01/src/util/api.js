@@ -19,6 +19,9 @@ export const forgotPasswordApi = (email, oldPassword, newPassword) => {
 export const getProductsApi = (params) => {
   return axios.get("/v1/api/products", { params });
 };
+export const getTopProductsApi = () => {
+  return axios.get("/v1/api/products/top");
+};
 export const getProductDetailApi = (id) => {
   return axios.get(`/v1/api/products/${id}`);
 };

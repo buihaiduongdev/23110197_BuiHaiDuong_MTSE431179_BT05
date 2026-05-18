@@ -10,6 +10,7 @@ import {
   Slider,
   Space,
   Tag,
+  Pagination,
 } from "antd";
 import { Link } from "react-router-dom";
 import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
@@ -23,6 +24,10 @@ const ProductsPage = () => {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [sortBy, setSortBy] = useState("createdAt_desc");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [totalProducts, setTotalProducts] = useState(0);
+
   useEffect(() => {
     let isMounted = true;
     const fetchProducts = async () => {
@@ -33,9 +38,12 @@ const ProductsPage = () => {
           minPrice: priceRange[0],
           maxPrice: priceRange[1],
           sortBy,
+          page: currentPage,
+          limit: pageSize,
         });
         if (isMounted && res && res.EC === 0) {
           setProducts(res.data);
+          setTotalProducts(res.pagination?.total || 0);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -48,7 +56,8 @@ const ProductsPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [search, priceRange, sortBy]);
+  }, [search, priceRange, sortBy, currentPage, pageSize]);
+
 
   const renderProductCard = (product) => {
     const imageSrc =
@@ -79,7 +88,7 @@ const ProductsPage = () => {
           >
             <div className="flex flex-col gap-2 text-left">
               <div className="flex justify-between items-start">
-                <h3 className="font-bold text-lg m-0 truncate w-3/4 !text-black">
+                <h3 className="font-bold text-lg m-0 truncate w-3/4 text-black!">
                   {product.name}
                 </h3>
                 <span className="text-purple-600 font-bold">
@@ -132,7 +141,10 @@ const ProductsPage = () => {
               size="large"
               className="rounded-xl border-gray-200 h-11"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </Col>
           <Col xs={24} md={8}>
@@ -142,7 +154,10 @@ const ProductsPage = () => {
                 range
                 max={1000}
                 defaultValue={[0, 1000]}
-                onAfterChange={(val) => setPriceRange(val)}
+                onAfterChange={(val) => {
+                  setPriceRange(val);
+                  setCurrentPage(1);
+                }}
                 trackStyle={[{ backgroundColor: "#9333ea" }]}
                 handleStyle={[
                   { borderColor: "#9333ea" },
@@ -156,7 +171,10 @@ const ProductsPage = () => {
             <Select
               className="w-full h-11 rounded-xl"
               value={sortBy}
-              onChange={setSortBy}
+              onChange={(val) => {
+                setSortBy(val);
+                setCurrentPage(1);
+              }}
               options={[
                 { value: "createdAt_desc", label: "Mới nhất" },
                 { value: "price_asc", label: "Giá thấp đến cao" },
@@ -174,10 +192,30 @@ const ProductsPage = () => {
             <h2 className="text-2xl font-bold text-black! m-0">Danh sách</h2>
             <div className="flex items-center gap-2 text-gray-400 bg-white px-4 py-2 rounded-full border border-gray-100">
               <FilterOutlined />
-              <span>Tìm thấy {products.length} sản phẩm</span>
+              <span>Tìm thấy {totalProducts} sản phẩm</span>
             </div>
           </div>
           <Row gutter={[24, 24]}>{products.map(renderProductCard)}</Row>
+
+          {products.length > 0 && (
+            <div className="mt-12 flex justify-center">
+              <Pagination
+                current={currentPage}
+                total={totalProducts}
+                pageSize={pageSize}
+                onChange={(page, size) => {
+                  setCurrentPage(page);
+                  setPageSize(size);
+                }}
+                showSizeChanger
+                showTotal={(total, range) =>
+                  `${range[0]}-${range[1]} của ${total} sản phẩm`
+                }
+                className="custom-pagination"
+              />
+            </div>
+          )}
+
           {products.length === 0 && !loading && (
             <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-200 text-gray-400">
               <Space direction="vertical" size="large">
@@ -189,6 +227,7 @@ const ProductsPage = () => {
                     setSearch("");
                     setPriceRange([0, 1000]);
                     setSortBy("createdAt_desc");
+                    setCurrentPage(1);
                   }}
                 >
                   Xóa bộ lọc

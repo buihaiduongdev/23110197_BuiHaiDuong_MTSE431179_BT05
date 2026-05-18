@@ -35,6 +35,7 @@ model Product {
   images      Json?    
   stock       Int      @default(0)
   sold        Int      @default(0)
+  views       Int      @default(0)
   categoryId  Int?
   category    Category? @relation(fields: [categoryId], references: [id])
   isNew       Boolean  @default(false)

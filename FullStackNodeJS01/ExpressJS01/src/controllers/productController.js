@@ -1,4 +1,4 @@
-const { getAllProducts, getProductById, seedProductsService } = require("../services/productServices");
+const { getAllProducts, getProductById, getTopProducts, seedProductsService } = require("../services/productServices");
 
 const getProducts = async (req, res) => {
     const filters = {
@@ -6,12 +6,29 @@ const getProducts = async (req, res) => {
         categoryId: req.query.categoryId,
         minPrice: req.query.minPrice,
         maxPrice: req.query.maxPrice,
-        sortBy: req.query.sortBy
+        sortBy: req.query.sortBy,
+        page: req.query.page,
+        limit: req.query.limit
     };
     let results = await getAllProducts(filters);
     return res.status(200).json({
         EC: 0,
-        data: results
+        data: results.products,
+        pagination: results.pagination
+    })
+}
+
+const getTop = async (req, res) => {
+    let result = await getTopProducts();
+    if (result) {
+        return res.status(200).json({
+            EC: 0,
+            data: result
+        })
+    }
+    return res.status(500).json({
+        EC: 1,
+        EM: "Lỗi lấy sản phẩm nổi bật"
     })
 }
 
@@ -37,6 +54,7 @@ const seedProducts = async (req, res) => {
 
 module.exports = {
     getProducts,
+    getTop,
     getProductDetail,
     seedProducts
 }

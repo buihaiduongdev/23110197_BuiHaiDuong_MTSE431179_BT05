@@ -1,31 +1,39 @@
 import { useEffect, useState } from "react";
-import { Row, Col, Card, Badge, Button, Spin, notification } from "antd";
+import { Col, Card, Badge, Button, Spin, notification, Tag } from "antd";
 import { Link } from "react-router-dom";
-import { getProductsApi, seedProductsApi } from "../util/api";
+import { getTopProductsApi, seedProductsApi } from "../util/api";
 import heroImg from "../assets/hero.png";
 
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
 const Home = () => {
-  const [products, setProducts] = useState([]);
+  const [topSelling, setTopSelling] = useState([]);
+  const [topViewed, setTopViewed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
-    const fetchProducts = async () => {
+    const fetchTopProducts = async () => {
       try {
         setLoading(true);
-        const res = await getProductsApi();
+        const res = await getTopProductsApi();
         if (isMounted && res && res.EC === 0) {
-          setProducts(res.data);
+          setTopSelling(res.data.topSelling || []);
+          setTopViewed(res.data.topViewed || []);
         }
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching top products:", error);
       } finally {
         if (isMounted) setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchTopProducts();
     return () => {
       isMounted = false;
     };
@@ -44,57 +52,94 @@ const Home = () => {
     }
   };
 
-  const renderProductCard = (product) => {
+  const renderProductCard = (product, isSlide = false) => {
     const imageSrc =
       Array.isArray(product.images) && product.images.length > 0
         ? product.images[0]
         : product.image || "";
 
+    const cardContent = (
+      <Link to={`/product/${product.id}`} className="group block h-full">
+        <Card
+          hoverable
+          className="rounded-2xl overflow-hidden border-none shadow-sm hover:shadow-xl transition-all h-full mx-1"
+          cover={
+            <div className="h-52 bg-gray-50 flex items-center justify-center p-4 overflow-hidden relative">
+              <img
+                alt={product.name}
+                src={imageSrc}
+                className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
+              />
+              {product.isNew && (
+                <div className="absolute top-4 left-4 bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  NEW
+                </div>
+              )}
+            </div>
+          }
+        >
+          <div className="flex flex-col gap-2 text-left">
+            <h3 className="font-bold text-lg m-0 truncate text-black!">
+              {product.name}
+            </h3>
+            <div className="flex justify-between items-center mb-1">
+              <Tag
+                color="blue"
+                className="m-0 text-[10px] px-1 border-none bg-blue-50 text-blue-500"
+              >
+                {product.category?.name || "Keyboard"}
+              </Tag>
+              <span className="text-[10px] text-gray-400">
+                Lượt xem: {product.views || 0}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-purple-600 font-bold">
+                ${product.price}
+              </span>
+              <span className="text-xs text-gray-400">
+                {product.sold || 0} đã bán
+              </span>
+            </div>
+            <Button
+              type="primary"
+              block
+              className="mt-2 rounded-lg bg-purple-600 border-none hover:bg-purple-700 h-10"
+            >
+              Chi tiết
+            </Button>
+          </div>
+        </Card>
+      </Link>
+    );
+
+    if (isSlide) {
+      return (
+        <SwiperSlide key={product.id} className="py-2">
+          {cardContent}
+        </SwiperSlide>
+      );
+    }
+
     return (
       <Col xs={24} sm={12} lg={6} key={product.id}>
-        <Link to={`/product/${product.id}`} className="group">
-          <Card
-            hoverable
-            className="rounded-2xl overflow-hidden border-none shadow-sm hover:shadow-xl transition-all h-full"
-            cover={
-              <div className="h-52 bg-gray-50 flex items-center justify-center p-4 overflow-hidden relative">
-                <img
-                  alt={product.name}
-                  src={imageSrc}
-                  className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
-                />
-                {product.isNew && (
-                  <div className="absolute top-4 left-4 bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    NEW
-                  </div>
-                )}
-              </div>
-            }
-          >
-            <div className="flex flex-col gap-2 text-left">
-              <h3 className="font-bold text-lg m-0 truncate text-black!">
-                {product.name}
-              </h3>
-              <div className="flex justify-between items-center">
-                <span className="text-purple-600 font-bold">
-                  ${product.price}
-                </span>
-                <span className="text-xs text-gray-400">
-                  {product.sold || 0} đã bán
-                </span>
-              </div>
-              <Button
-                type="primary"
-                block
-                className="mt-2 rounded-lg bg-purple-600 border-none hover:bg-purple-700 h-10"
-              >
-                Chi tiết
-              </Button>
-            </div>
-          </Card>
-        </Link>
+        {cardContent}
       </Col>
     );
+  };
+
+  const swiperConfig = {
+    modules: [Navigation, Pagination],
+    navigation: true,
+    pagination: { clickable: true },
+    spaceBetween: 20,
+    slidesPerView: 1,
+    breakpoints: {
+      640: { slidesPerView: 2 },
+      768: { slidesPerView: 3 },
+      1024: { slidesPerView: 4 },
+    },
+    className: "pb-12",
   };
 
   return (
@@ -122,11 +167,13 @@ const Home = () => {
         </div>
       </div>
 
-      <Spin spinning={loading} tip="Đang tải sản phẩm...">
-        {/* New Arrivals Section */}
+      <Spin spinning={loading} tip="Đang tải dữ liệu...">
+        {/* Top Selling Section (Horizontal Pagination / Swiper) */}
         <div className="mb-16">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-black! m-0">Sản phẩm mới</h2>
+            <h2 className="text-3xl font-bold text-black! m-0">
+              Top Sản phẩm bán chạy nhất
+            </h2>
             <Link
               to="/products"
               className="text-purple-600 font-medium hover:underline"
@@ -134,23 +181,29 @@ const Home = () => {
               Xem tất cả
             </Link>
           </div>
-          <Row gutter={[24, 24]}>
-            {products
-              .filter((p) => p.isNew)
-              .slice(0, 4)
-              .map(renderProductCard)}
-          </Row>
+          {topSelling.length > 0 ? (
+            <Swiper {...swiperConfig}>
+              {topSelling.map((p) => renderProductCard(p, true))}
+            </Swiper>
+          ) : (
+            <div className="text-center text-gray-400">Không có dữ liệu</div>
+          )}
         </div>
 
-        {/* Hot Sellers Section */}
+        {/* Most Viewed Section (Horizontal Pagination / Swiper) */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-black! mb-8">Bán chạy nhất</h2>
-          <Row gutter={[24, 24]}>
-            {products
-              .filter((p) => p.isHot)
-              .slice(0, 4)
-              .map(renderProductCard)}
-          </Row>
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-black! m-0">
+              Top Sản phẩm xem nhiều nhất
+            </h2>
+          </div>
+          {topViewed.length > 0 ? (
+            <Swiper {...swiperConfig}>
+              {topViewed.map((p) => renderProductCard(p, true))}
+            </Swiper>
+          ) : (
+            <div className="text-center text-gray-400">Không có dữ liệu</div>
+          )}
         </div>
       </Spin>
 
