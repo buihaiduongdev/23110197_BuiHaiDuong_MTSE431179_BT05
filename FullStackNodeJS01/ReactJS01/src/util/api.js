@@ -28,3 +28,37 @@ export const getProductDetailApi = (id) => {
 export const seedProductsApi = () => {
   return axios.post("/v1/api/seed-products");
 };
+
+// Cart APIs
+export const getCartApi = () => {
+  return axios.get("/v1/api/cart");
+};
+export const addToCartApi = (productId, quantity) => {
+  return axios.post("/v1/api/cart", { productId, quantity });
+};
+export const updateCartItemApi = (cartItemId, quantity) => {
+  return axios.put("/v1/api/cart/item", { cartItemId, quantity });
+};
+export const deleteCartItemApi = (cartItemId) => {
+  return axios.delete(`/v1/api/cart/item/${cartItemId}`);
+};
+export const clearCartApi = () => {
+  return axios.delete("/v1/api/cart");
+};
+
+// Order APIs
+export const createOrderApi = (paymentMethod, shippingAddress, phone) => {
+  return axios.post("/v1/api/orders", { paymentMethod, shippingAddress, phone });
+};
+export const getUserOrdersApi = () => {
+  return axios.get("/v1/api/orders");
+};
+export const getOrderDetailsApi = (orderId) => {
+  return axios.get(`/v1/api/orders/${orderId}`);
+};
+export const cancelOrderApi = (orderId) => {
+  return axios.post(`/v1/api/orders/${orderId}/cancel`);
+};
+export const updateOrderStatusSimulationApi = (orderId, status) => {
+  return axios.put(`/v1/api/orders/${orderId}/status`, { status });
+};

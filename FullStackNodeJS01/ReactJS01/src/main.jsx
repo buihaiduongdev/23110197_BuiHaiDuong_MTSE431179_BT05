@@ -10,6 +10,9 @@ import UserPage from "./pages/user.jsx";
 import ForgotPasswordPage from "./pages/forgot-password.jsx";
 import ProductDetail from "./pages/product-detail.jsx";
 import ProductsPage from "./pages/products.jsx";
+import CartPage from "./pages/cart.jsx";
+import CheckoutPage from "./pages/checkout.jsx";
+import OrdersPage from "./pages/orders.jsx";
 import { AuthWrapper } from "./components/context/auth.wrapper.jsx";
 
 const router = createBrowserRouter([
@@ -21,6 +24,9 @@ const router = createBrowserRouter([
       { path: "user", element: <UserPage /> },
       { path: "product/:id", element: <ProductDetail /> },
       { path: "products", element: <ProductsPage /> },
+      { path: "cart", element: <CartPage /> },
+      { path: "checkout", element: <CheckoutPage /> },
+      { path: "orders", element: <OrdersPage /> },
     ],
   },
   { path: "register", element: <RegisterPage /> },

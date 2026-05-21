@@ -4,6 +4,8 @@ import {
   UsergroupAddOutlined,
   SettingOutlined,
   ShoppingOutlined,
+  ShoppingCartOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import { Menu } from "antd";
 import { Link, useNavigate } from "react-router-dom";
@@ -24,6 +26,20 @@ const Header = () => {
       key: "products",
       icon: <ShoppingOutlined />,
     },
+    ...(auth.isAuthenticated
+      ? [
+          {
+            label: <Link to={"/cart"}>Giỏ hàng</Link>,
+            key: "cart",
+            icon: <ShoppingCartOutlined />,
+          },
+          {
+            label: <Link to={"/orders"}>Đơn hàng</Link>,
+            key: "orders",
+            icon: <HistoryOutlined />,
+          },
+        ]
+      : []),
     ...(auth.isAuthenticated && auth.user.role === "Admin"
       ? [
           {

@@ -144,7 +144,6 @@ const Home = () => {
 
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen text-left">
-      {/* Promotion Banner */}
       <div className="relative rounded-3xl overflow-hidden mb-12 h-64 md:h-96 group">
         <img
           src={heroImg}
@@ -168,7 +167,6 @@ const Home = () => {
       </div>
 
       <Spin spinning={loading} tip="Đang tải dữ liệu...">
-        {/* Top Selling Section (Horizontal Pagination / Swiper) */}
         <div className="mb-16">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-black! m-0">
@@ -190,7 +188,6 @@ const Home = () => {
           )}
         </div>
 
-        {/* Most Viewed Section (Horizontal Pagination / Swiper) */}
         <div className="mb-16">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-black! m-0">
@@ -207,7 +204,6 @@ const Home = () => {
         </div>
       </Spin>
 
-      {/* Seed Data Button */}
       <div className="mt-16 mb-8 flex justify-center">
         <Button
           type="dashed"

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Row,
   Col,
@@ -26,14 +26,48 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-import { getProductDetailApi, getProductsApi } from "../util/api";
+import { getProductDetailApi, getProductsApi, addToCartApi } from "../util/api";
+import { AuthContext } from "../components/context/auth.context";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { auth } = useContext(AuthContext);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [relatedProducts, setRelatedProducts] = useState([]);
+
+  const handleAddToCart = async () => {
+    if (!auth.isAuthenticated) {
+      notification.warning({
+        message: "Thông báo",
+        description: "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!"
+      });
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await addToCartApi(id, quantity);
+      if (res && res.EC === 0) {
+        notification.success({
+          message: "Thành công",
+          description: "Đã thêm sản phẩm vào giỏ hàng!"
+        });
+      } else {
+        notification.error({
+          message: "Thất bại",
+          description: res.EM || "Không thể thêm sản phẩm vào giỏ hàng"
+        });
+      }
+    } catch (error) {
+      notification.error({
+        message: "Lỗi",
+        description: error.message || "Đã xảy ra lỗi"
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -151,6 +185,7 @@ const ProductDetail = () => {
                   type="primary"
                   size="large"
                   icon={<ShoppingCartOutlined />}
+                  onClick={handleAddToCart}
                   className="h-14 flex-1 bg-purple-600 border-none rounded-xl text-lg font-bold hover:bg-purple-700"
                 >
                   Thêm vào giỏ hàng
